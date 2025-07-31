@@ -18,7 +18,7 @@
       ignore_errors: true
 
     - name: Display the output
-      debug: msg: "{{ hostmap }}:{{ role_cu1.stdout }}"
+      debug: msg: "{{ hostmap }}: {{ role_cu1.stdout }}"
 
     - name: Simpan hasil ROLE .IDFGICU1 ke artefact
       set_stats:
@@ -36,7 +36,7 @@
       ignore_errors: true
 
     - name: Display the output
-      debug: msg: "{{ hostmap }}:"{{ role_su1.stdout }}"
+      debug: msg: "{{ hostmap }}: {{ role_su1.stdout }}"
 
     - name: Simpan hasil ROLE .IDFGISU1 ke artefact
       set_stats:
