@@ -1,59 +1,30 @@
 ---
-- name: CEK ROLE DB1 (IDFGICU1)
-  hosts: localhost
-  gather_facts: no
+- name: CEK ROLE DB1 untuk .IDFGICU1 dan .IDFGISU1
+  hosts: 192.168.1.211
   tasks:
-    - name: Source profile .IDFGICU1 & cek role DB1
+    - name: Cek role DB1 dari .IDFGICU1
       shell: |
-        . .IDFGICU1
+        . ~/.IDFGICU1
         echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
-      args:
-        executable: /bin/bash
-      register: db1_role
-      ignore_errors: yes
+      register: db1_cu1_role
 
-    - name: Debug role DB1
-      debug:
-        msg: "{{ db1_role.stdout }}"
+    - name: Cek role DB1 dari .IDFGISU1
+      shell: |
+        . ~/.IDFGISU1
+        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
+      register: db1_su1_role
 
-    - name: Set Primary DB1
-      set_stats:
-        data:
-          db1_primary: "ora19cdg01.bwok.org"
-      when: "'PRIMARY' in db1_role.stdout"
-
-    - name: Set Standby DB1
-      set_stats:
-        data:
-          db1_standby: "ora19cdg01.bwok.org"
-      when: "'PHYSICAL STANDBY' in db1_role.stdout"
-
-#########################################################
-- name: CEK ROLE DB2 (IDFGISU1)
-  hosts: localhost
-  gather_facts: no
+- name: CEK ROLE DB2 untuk .IDFGICU1 dan .IDFGISU1
+  hosts: 192.168.1.222
   tasks:
-    - name: Source profile .IDFGISU1 & cek role DB2
+    - name: Cek role DB2 dari .IDFGICU1
       shell: |
-        . .IDFGISU1
+        . ~/.IDFGICU1
         echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
-      args:
-        executable: /bin/bash
-      register: db2_role
-      ignore_errors: yes
+      register: db2_cu1_role
 
-    - name: Debug role DB2
-      debug:
-        msg: "{{ db2_role.stdout }}"
-
-    - name: Set Primary DB2
-      set_stats:
-        data:
-          db2_primary: "ora19cdg02.bwok.org"
-      when: "'PRIMARY' in db2_role.stdout"
-
-    - name: Set Standby DB2
-      set_stats:
-        data:
-          db2_standby: "ora19cdg02.bwok.org"
-      when: "'PHYSICAL STANDBY' in db2_role.stdout"
+    - name: Cek role DB2 dari .IDFGISU1
+      shell: |
+        . ~/.IDFGISU1
+        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
+      register: db2_su1_role
