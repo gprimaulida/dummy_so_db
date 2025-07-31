@@ -7,16 +7,16 @@
       "192.168.1.211": db1
       "192.168.1.222": db2
   tasks:
-   - name: Cek role di ENV .IDFGICU1
-     shell: |
-       source ~/.IDFGICU1
-       export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
-       export ORACLE_SID=orcl
-       export PATH=$PATH:$ORACLE_HOME/bin
-       echo "SET HEADING OFF FEEDBACK OFF VERIFY OFF ECHO OFF
-       SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | awk '/PRIMARY|STANDBY/ {print $1}'
-     register: role_cu1
-     ignore_errors: true
+    - name: Cek role di ENV .IDFGICU1
+      shell: |
+        source ~/.IDFGICU1
+        export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
+        export ORACLE_SID=orcl
+        export PATH=$PATH:$ORACLE_HOME/bin
+        echo "SET HEADING OFF FEEDBACK OFF VERIFY OFF ECHO OFF
+        SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | awk '/PRIMARY|STANDBY/ {print $1}'
+      register: role_cu1
+      ignore_errors: true
 
     - name: Display the output
       debug:
@@ -27,16 +27,16 @@
         data:
           "role_cu1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_cu1.stdout }}"
  
-    - name: Cek role di ENV .IDFGISU1
-      shell: |
-        source ~/.IDFGISU1
-        export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
-        export ORACLE_SID=orcl
-        export PATH=$PATH:$ORACLE_HOME/bin
-        echo "SET HEADING OFF FEEDBACK OFF VERIFY OFF ECHO OFF
-        SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | awk '/PRIMARY|STANDBY/ {print $1}'
-      register: role_su1
-      ignore_errors: true
+     - name: Cek role di ENV .IDFGISU1
+       shell: |
+         source ~/.IDFGISU1
+         export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
+         export ORACLE_SID=orcl
+         export PATH=$PATH:$ORACLE_HOME/bin
+         echo "SET HEADING OFF FEEDBACK OFF VERIFY OFF ECHO OFF
+         SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | awk '/PRIMARY|STANDBY/ {print $1}'
+       register: role_su1
+       ignore_errors: true
             
     - name: Debug inventory_hostname
       debug:
