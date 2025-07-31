@@ -5,7 +5,7 @@
   tasks:
     - name: Tampilkan hasil dari .bash_profile
       debug:
-        msg: "Role DB dari .bash_profile: {{ db_role_profile }}"
+        msg: "Role DB dari .bash_profile: {{ db_role_bash_profile }}"
 
     - name: Tampilkan hasil dari .bashrc
       debug:
@@ -15,14 +15,14 @@
       set_fact:
         switchover_action: "DEV_TO_UAT"
       when:
-        - "'PRIMARY' in db_role_profile"
+        - "'PRIMARY' in db_role_bash_profile"
         - "'STANDBY' in db_role_bashrc"
 
     - name: Cek role .bash_profile (UAT Primary & Dev Standby)
       set_fact:
         switchover_action: "UAT_TO_DEV"
       when:
-        - "'STANDBY' in db_role_profile"
+        - "'STANDBY' in db_role_bash_profile"
         - "'PRIMARY' in db_role_bashrc"
 
     - name: Tampilkan action yang akan diambil
