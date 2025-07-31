@@ -46,9 +46,9 @@
           - "'UNKNOWN' not in host_terpilih_idfgisu1"
         success_msg: "✅ ROLE DB di .IDFGISU1 berhasil dideteksi"
         fail_msg: "❌ ROLE DB di .IDFGISU1 tidak lengkap"
-
+        
     - name: Simpan ke artifact untuk workflow selanjutnya
       set_stats:
         data:
-          host_terpilih_idfgicu1: "{{ host_terpilih_idfgicu1 }}"
-          host_terpilih_idfgisu1: "{{ host_terpilih_idfgisu1 }}"
+          idfgicu1: "{{ host_terpilih_idfgicu1 }}"
+          idfgisu1: "{{ host_terpilih_idfgisu1 }}"
