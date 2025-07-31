@@ -17,37 +17,9 @@
       register: role_cu1
       ignore_errors: true
 
-    - name: Display the output
-      debug: msg="{{ role_cu1.stdout }}"
-
-    - name: Set db standby
-      set_stats:
-        data:
-          standby_db: ""
-
-    - name: Display database role for primary
+    - name: Display hasil role .IDFGICU1 dari host {{ inventory_hostname }}
       debug:
-        msg: "db1"
-      register: prim
-      when: "'PRIMARY' in db1_role.stdout"
-
-    - name: Display database role for standby
-      debug:
-        msg: "db1"
-      register: stby
-      when: "'PHYSICAL STANDBY' in db1_role.stdout"
-
-    - name: Set db primary
-      set_stats:
-        data:
-          primary_db: "ora19cdg01.bwok.org"
-      when: "'PRIMARY' in db1_role.stdout"
-
-    - name: Set db standby
-      set_stats:
-        data:
-          standby_db: "ora19cdg01.bwok.org"
-      when: "'PHYSICAL STANDBY' in db1_role.stdout"
+        msg: "{{ role_cu1.stdout }}"
 
     - name: Simpan hasil ROLE .IDFGICU1 ke artefact
       set_stats:
@@ -64,37 +36,9 @@
       register: role_su1
       ignore_errors: true
 
-    - name: Display the output
-      debug: msg="{{ role_su1.stdout }}"
-
-    - name: Set db standby
-      set_stats:
-        data:
-          standby_db: ""
-
-    - name: Display database role for primary
+    - name: Display hasil role .IDFGISU1 dari host {{ inventory_hostname }}
       debug:
-        msg: "db1"
-      register: prim
-      when: "'PRIMARY' in db1_role.stdout"
-
-    - name: Display database role for standby
-      debug:
-        msg: "db1"
-      register: stby
-      when: "'PHYSICAL STANDBY' in db1_role.stdout"
-
-    - name: Set db primary
-      set_stats:
-        data:
-          primary_db: "ora19cdg01.bwok.org"
-      when: "'PRIMARY' in db1_role.stdout"
-
-    - name: Set db standby
-      set_stats:
-        data:
-          standby_db: "ora19cdg01.bwok.org"
-      when: "'PHYSICAL STANDBY' in db1_role.stdout"    
+        msg: "{{ role_su1.stdout }}"
 
     - name: Simpan hasil ROLE .IDFGISU1 ke artefact
       set_stats:
