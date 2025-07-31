@@ -50,3 +50,7 @@
     - name: Debug hasil role .IDFGISU1
       debug:
         msg: "role_su1_{{ hostmap[inventory_hostname] }} => {{ role_su1.stdout }}"
+
+    - name: Show full artefacts from this step
+      debug:
+        var: ansible_stats
