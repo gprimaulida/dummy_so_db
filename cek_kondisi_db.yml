@@ -1,30 +1,30 @@
 ---
-- name: Pengecekan Kondisi DB (Dev & UAT)
+- name: Pengecekan Kondisi DB1 dan DB2
   hosts: localhost
   gather_facts: no
   tasks:
-    - name: Tampilkan hasil dari .bash_profile
+    - name: Debug DB1 & DB2 roles
       debug:
-        msg: "Role DB dari .bash_profile: {{ db_role_bash_profile }}"
+        msg:
+          - "DB1 Primary: {{ db1_primary | default('') }}"
+          - "DB1 Standby: {{ db1_standby | default('') }}"
+          - "DB2 Primary: {{ db2_primary | default('') }}"
+          - "DB2 Standby: {{ db2_standby | default('') }}"
 
-    - name: Tampilkan hasil dari .bashrc
-      debug:
-        msg: "Role DB dari .bashrc: {{ db_role_bashrc }}"
-
-    - name: Cek role .bash_profile (Dev Primary & UAT Standby)
+    - name: Tentukan pasangan untuk switchover (CU1)
       set_fact:
-        switchover_action: "DEV_TO_UAT"
-      when:
-        - "'PRIMARY' in db_role_bash_profile"
-        - "'STANDBY' in db_role_bashrc"
+        source_db: "{{ db1_primary if db1_primary is defined else db2_primary }}"
+        target_db: "{{ db2_standby if db1_primary is defined else db1_standby }}"
+      when: db1_primary is defined or db2_primary is defined
 
-    - name: Cek role .bash_profile (UAT Primary & Dev Standby)
+    - name: Tentukan pasangan untuk switchover (SU1)
       set_fact:
-        switchover_action: "UAT_TO_DEV"
-      when:
-        - "'STANDBY' in db_role_bash_profile"
-        - "'PRIMARY' in db_role_bashrc"
+        source_db: "{{ db1_primary if db1_primary is defined else db2_primary }}"
+        target_db: "{{ db2_standby if db1_primary is defined else db1_standby }}"
+      when: db1_primary is defined or db2_primary is defined
 
-    - name: Tampilkan action yang akan diambil
+    - name: Debug hasil penjodohan
       debug:
-        msg: "Action switchover yang dipilih: {{ switchover_action | default('TIDAK ADA ACTION') }}"
+        msg:
+          - "Source DB: {{ source_db }}"
+          - "Target DB: {{ target_db }}"
