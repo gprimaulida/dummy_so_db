@@ -1,0 +1,28 @@
+---
+- name: Get Database Role from .bash_profile and .bashrc
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Cek role DB dari .bash_profile
+      shell: |
+        source ~/.bash_profile
+        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
+      register: db_role_bash_profile
+      ignore_errors: yes
+
+    - name: Cek role DB dari .bashrc
+      shell: |
+        source ~/.bashrc
+        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
+      register: db_role_bashrc
+      ignore_errors: yes
+
+    - name: Simpan hasil role dari .bash_profile
+      set_stats:
+        data:
+          db_role_profile: "{{ db_role_bash_profile.stdout | trim }}"
+
+    - name: Simpan hasil role dari .bashrc
+      set_stats:
+        data:
+          db_role_bashrc: "{{ db_role_bashrc.stdout | trim }}"
