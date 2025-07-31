@@ -1,34 +1,44 @@
 ---
-- name: CEK ROLE DB1 (.IDFGICU1 & .IDFGISU1)
-  hosts: 192.168.1.211
+- name: Cek ROLE database di DB1 dan DB2 (.IDFGICU1 dan .IDFGISU1)
+  hosts: 192.168.1.211,192.168.1.222
+  gather_facts: no
+  vars:
+    hostmap:
+      192.168.1.211: db1
+      192.168.1.222: db2
   tasks:
-    - name: Get DB1 Role
+    - name: Cek role di ENV .IDFGICU1
       shell: |
         source ~/.IDFGICU1
         export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
         export ORACLE_SID=orcl
         export PATH=$PATH:$ORACLE_HOME/bin
-        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
-      register: db1_role
-      ignore_errors: yes
+        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | grep "PRIMARY" && echo "PRIMARY" || echo "STANDBY"
+      register: role_cu1
+      ignore_errors: true
 
-    - name: Set facts for DB1
-      set_fact:
-        db1_role: "{{ db1_role.stdout }}"
+    - name: Display the output
+      debug: msg="{{ role_cu1.stdout }}"
 
-- name: CEK ROLE DB2 (.IDFGICU1 & .IDFGISU1)
-  hosts: 192.168.1.222
-  tasks:
-    - name: Get DB2 Role
+    - name: Simpan hasil ROLE .IDFGICU1 ke artefact
+      set_stats:
+        data:
+          "role_cu1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_cu1.stdout }}"
+
+    - name: Cek role di ENV .IDFGISU1
       shell: |
-        source ~/.IDFGICU1
+        source ~/.IDFGISU1
         export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
         export ORACLE_SID=orcl
         export PATH=$PATH:$ORACLE_HOME/bin
-        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
-      register: db2_role
-      ignore_errors: yes
+        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | grep "PRIMARY" && echo "PRIMARY" || echo "STANDBY"
+      register: role_su1
+      ignore_errors: true
 
-    - name: Set facts for DB2
-      set_fact:
-        db2_role: "{{ db2_role.stdout }}"
+    - name: Display the output
+      debug: msg="{{ role_su1.stdout }}"
+
+    - name: Simpan hasil ROLE .IDFGISU1 ke artefact
+      set_stats:
+        data:
+          "role_su1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_su1.stdout }}"
