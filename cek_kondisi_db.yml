@@ -1,30 +1,65 @@
 ---
-- name: Pengecekan Kondisi DB1 dan DB2
+- name: PENJODOHAN DAN AKSI SWITCHOVER STATUS
   hosts: localhost
-  gather_facts: no
+  vars:
+    db1_ip: "192.168.1.211"
+    db2_ip: "192.168.1.222"
   tasks:
-    - name: Debug DB1 & DB2 roles
+
+    - name: Log kondisi dari semua profile
       debug:
         msg:
-          - "DB1 Primary: {{ db1_primary | default('') }}"
-          - "DB1 Standby: {{ db1_standby | default('') }}"
-          - "DB2 Primary: {{ db2_primary | default('') }}"
-          - "DB2 Standby: {{ db2_standby | default('') }}"
+          - "DB1 @ IDFGICU1: {{ hostvars[db1_ip]['db1_cu1_role'].stdout }}"
+          - "DB2 @ IDFGICU1: {{ hostvars[db2_ip]['db2_cu1_role'].stdout }}"
+          - "DB1 @ IDFGISU1: {{ hostvars[db1_ip]['db1_su1_role'].stdout }}"
+          - "DB2 @ IDFGISU1: {{ hostvars[db2_ip]['db2_su1_role'].stdout }}"
 
-    - name: Tentukan pasangan untuk switchover (CU1)
-      set_fact:
-        source_db: "{{ db1_primary if db1_primary is defined else db2_primary }}"
-        target_db: "{{ db2_standby if db1_primary is defined else db1_standby }}"
-      when: db1_primary is defined or db2_primary is defined
+    # === Kondisi IDFGICU1 ===
+    - name: Switchover Check - .IDFGICU1 DB1 Primary
+      when:
+        - "'PRIMARY' in hostvars[db1_ip]['db1_cu1_role'].stdout"
+        - "'PHYSICAL STANDBY' in hostvars[db2_ip]['db2_cu1_role'].stdout"
+      block:
+        - name: Check switchover_status dari DB1 dan DB2
+          import_playbook: check_switchover_status.yml
+          vars:
+            source_db: "{{ db1_ip }}"
+            target_db: "{{ db2_ip }}"
+            profile_env: ".IDFGICU1"
 
-    - name: Tentukan pasangan untuk switchover (SU1)
-      set_fact:
-        source_db: "{{ db1_primary if db1_primary is defined else db2_primary }}"
-        target_db: "{{ db2_standby if db1_primary is defined else db1_standby }}"
-      when: db1_primary is defined or db2_primary is defined
+    - name: Switchover Check - .IDFGICU1 DB2 Primary
+      when:
+        - "'PRIMARY' in hostvars[db2_ip]['db2_cu1_role'].stdout"
+        - "'PHYSICAL STANDBY' in hostvars[db1_ip]['db1_cu1_role'].stdout"
+      block:
+        - name: Check switchover_status dari DB2 dan DB1
+          import_playbook: check_switchover_status.yml
+          vars:
+            source_db: "{{ db2_ip }}"
+            target_db: "{{ db1_ip }}"
+            profile_env: ".IDFGICU1"
 
-    - name: Debug hasil penjodohan
-      debug:
-        msg:
-          - "Source DB: {{ source_db }}"
-          - "Target DB: {{ target_db }}"
+    # === Kondisi IDFGISU1 ===
+    - name: Switchover Check - .IDFGISU1 DB1 Primary
+      when:
+        - "'PRIMARY' in hostvars[db1_ip]['db1_su1_role'].stdout"
+        - "'PHYSICAL STANDBY' in hostvars[db2_ip]['db2_su1_role'].stdout"
+      block:
+        - name: Check switchover_status dari DB1 dan DB2
+          import_playbook: check_switchover_status.yml
+          vars:
+            source_db: "{{ db1_ip }}"
+            target_db: "{{ db2_ip }}"
+            profile_env: ".IDFGISU1"
+
+    - name: Switchover Check - .IDFGISU1 DB2 Primary
+      when:
+        - "'PRIMARY' in hostvars[db2_ip]['db2_su1_role'].stdout"
+        - "'PHYSICAL STANDBY' in hostvars[db1_ip]['db1_su1_role'].stdout"
+      block:
+        - name: Check switchover_status dari DB2 dan DB1
+          import_playbook: check_switchover_status.yml
+          vars:
+            source_db: "{{ db2_ip }}"
+            target_db: "{{ db1_ip }}"
+            profile_env: ".IDFGISU1"
