@@ -1,26 +1,33 @@
 ---
-- name: Switchover Status Check from source and target
-  hosts: "{{ source_db }}"
+- name: ACTION PENJODOHAN 1 (ENV .IDFGICU1)
+  hosts: localhost
   tasks:
-    - name: Cek switchover_status dari source DB
-      shell: |
-        . ~/{{ profile_env }}
-        echo "SELECT switchover_status FROM v\$database;" | sqlplus -s / as sysdba
-      register: sw_status_src
+    - name: Ambil switchover_status dari DB1 dan DB2 jika DB1 Primary
+      when:
+        - "'PRIMARY' in hostvars['192.168.1.211']['db1_role']"
+        - "'PHYSICAL STANDBY' in hostvars['192.168.1.222']['db2_role']"
+      block:
+        - name: Switchover status dari DB1
+          shell: |
+            ssh oracle@192.168.1.211 "source ~/.IDFGICU1; echo 'SELECT switchover_status FROM v\\$database;' | sqlplus -s / as sysdba"
+          register: switchover_db1
 
-    - name: Tampilkan status switchover source
-      debug:
-        msg: "Source ({{ source_db }}) switchover_status: {{ sw_status_src.stdout }}"
+        - name: Switchover status dari DB2
+          shell: |
+            ssh oracle@192.168.1.222 "source ~/.IDFGICU1; echo 'SELECT switchover_status FROM v\\$database;' | sqlplus -s / as sysdba"
+          register: switchover_db2
 
-- name: Switchover Status Check from target
-  hosts: "{{ target_db }}"
-  tasks:
-    - name: Cek switchover_status dari target DB
-      shell: |
-        . ~/{{ profile_env }}
-        echo "SELECT switchover_status FROM v\$database;" | sqlplus -s / as sysdba
-      register: sw_status_tgt
+    - name: Ambil switchover_status dari DB2 dan DB1 jika DB2 Primary
+      when:
+        - "'PRIMARY' in hostvars['192.168.1.222']['db2_role']"
+        - "'PHYSICAL STANDBY' in hostvars['192.168.1.211']['db1_role']"
+      block:
+        - name: Switchover status dari DB2
+          shell: |
+            ssh oracle@192.168.1.222 "source ~/.IDFGICU1; echo 'SELECT switchover_status FROM v\\$database;' | sqlplus -s / as sysdba"
+          register: switchover_db2
 
-    - name: Tampilkan status switchover target
-      debug:
-        msg: "Target ({{ target_db }}) switchover_status: {{ sw_status_tgt.stdout }}"
+        - name: Switchover status dari DB1
+          shell: |
+            ssh oracle@192.168.1.211 "source ~/.IDFGICU1; echo 'SELECT switchover_status FROM v\\$database;' | sqlplus -s / as sysdba"
+          register: switchover_db1
