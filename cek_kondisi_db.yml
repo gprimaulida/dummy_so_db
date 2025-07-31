@@ -1,18 +1,54 @@
 ---
-- name: Pengecekan ENV .IDFGICU1
+- name: Validasi role DB dan hasilkan host_terpilih dalam format deskriptif
   hosts: localhost
+  gather_facts: no
+  vars:
+    host_ips:
+      db1: "192.168.1.211"
+      db2: "192.168.1.222"
   tasks:
-    - name: "Pengecekan siapa PRIMARY dan STANDBY untuk .IDFGICU1"
-      debug:
-        msg: >
-          DB1 = {{ 'PRIMARY' if 'PRIMARY' in hostvars['192.168.1.211']['db1_role'] else 'STANDBY' }},
-          DB2 = {{ 'PRIMARY' if 'PRIMARY' in hostvars['192.168.1.222']['db2_role'] else 'STANDBY' }}
+    - name: Ambil hasil role ENV .IDFGICU1 dari artefact
+      set_fact:
+        role_cu1_db1: "{{ hostvars['192.168.1.211']['role_cu1_db1'] | default('UNKNOWN') }}"
+        role_cu1_db2: "{{ hostvars['192.168.1.222']['role_cu1_db2'] | default('UNKNOWN') }}"
 
-- name: Pengecekan ENV .IDFGISU1
-  hosts: localhost
-  tasks:
-    - name: "Pengecekan siapa PRIMARY dan STANDBY untuk .IDFGISU1"
+    - name: Ambil hasil role ENV .IDFGISU1 dari artefact
+      set_fact:
+        role_su1_db1: "{{ hostvars['192.168.1.211']['role_su1_db1'] | default('UNKNOWN') }}"
+        role_su1_db2: "{{ hostvars['192.168.1.222']['role_su1_db2'] | default('UNKNOWN') }}"
+
+    - name: Format hasil untuk host_terpilih_idfgicu1
+      set_fact:
+        host_terpilih_idfgicu1: "DB1_{{ role_cu1_db1 }} dan DB2_{{ role_cu1_db2 }}"
+
+    - name: Format hasil untuk host_terpilih_idfgisu1
+      set_fact:
+        host_terpilih_idfgisu1: "DB1_{{ role_su1_db1 }} dan DB2_{{ role_su1_db2 }}"
+
+    - name: Tampilkan hasil akhir host_terpilih_idfgicu1
       debug:
-        msg: >
-          DB1 = {{ 'PRIMARY' if 'PRIMARY' in hostvars['192.168.1.211']['db1_role'] else 'STANDBY' }},
-          DB2 = {{ 'PRIMARY' if 'PRIMARY' in hostvars['192.168.1.222']['db2_role'] else 'STANDBY' }}
+        msg: "{{ host_terpilih_idfgicu1 }}"
+
+    - name: Tampilkan hasil akhir host_terpilih_idfgisu1
+      debug:
+        msg: "{{ host_terpilih_idfgisu1 }}"
+
+    - name: Validasi bahwa nilai host_terpilih_idfgicu1 valid
+      assert:
+        that:
+          - "'UNKNOWN' not in host_terpilih_idfgicu1"
+        success_msg: "✅ ROLE DB di .IDFGICU1 berhasil dideteksi"
+        fail_msg: "❌ ROLE DB di .IDFGICU1 tidak lengkap"
+
+    - name: Validasi bahwa nilai host_terpilih_idfgisu1 valid
+      assert:
+        that:
+          - "'UNKNOWN' not in host_terpilih_idfgisu1"
+        success_msg: "✅ ROLE DB di .IDFGISU1 berhasil dideteksi"
+        fail_msg: "❌ ROLE DB di .IDFGISU1 tidak lengkap"
+
+    - name: Simpan ke artifact untuk workflow selanjutnya
+      set_stats:
+        data:
+          host_terpilih_idfgicu1: "{{ host_terpilih_idfgicu1 }}"
+          host_terpilih_idfgisu1: "{{ host_terpilih_idfgisu1 }}"
