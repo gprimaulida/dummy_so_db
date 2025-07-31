@@ -19,14 +19,10 @@
       register: role_cu1
       ignore_errors: true
 
-    - name: Tampilkan hasil ROLE .IDFGICU1
-      debug:
-        msg: "{{ hostmap[inventory_hostname] }}: {{ role_cu1.stdout | trim }}"
-
-    - name: Simpan hasil ROLE .IDFGICU1 ke artefact
+    - name: Simpan hasil ROLE .IDFGICU1 ke artefact dengan format yang diinginkan
       set_stats:
         data:
-          "role_cu1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_cu1.stdout | trim }}"
+          "{{ 'primary_db_cu1_' if role_cu1.stdout is search('PRIMARY') else 'standby_db_cu1_' }}{{ hostmap[inventory_hostname] }}": "{{ role_cu1.stdout | trim }}"
 
     - name: Cek role di ENV .IDFGISU1
       shell: |
@@ -39,11 +35,7 @@
       register: role_su1
       ignore_errors: true
 
-    - name: Tampilkan hasil ROLE .IDFGISU1
-      debug:
-        msg: "{{ hostmap[inventory_hostname] }}: {{ role_su1.stdout | trim }}"
-
-    - name: Simpan hasil ROLE .IDFGISU1 ke artefact
+    - name: Simpan hasil ROLE .IDFGISU1 ke artefact dengan format yang diinginkan
       set_stats:
         data:
-          "role_su1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_su1.stdout | trim }}"
+          "{{ 'primary_db_su1_' if role_su1.stdout is search('PRIMARY') else 'standby_db_su1_' }}{{ hostmap[inventory_hostname] }}": "{{ role_su1.stdout | trim }}"
