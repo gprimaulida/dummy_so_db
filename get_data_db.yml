@@ -1,28 +1,59 @@
 ---
-- name: Get Database Role from .bash_profile and .bashrc
-  hosts: all
+- name: CEK ROLE DB1 (IDFGICU1)
+  hosts: ora19cdg01.bwok.org
   gather_facts: no
   tasks:
-    - name: Cek role DB dari .bash_profile
+    - name: Source profile .IDFGICU1 & cek role DB1
       shell: |
-        source ~/.bash_profile
+        . .IDFGICU1
         echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
-      register: db_role_bash_profile
+      args:
+        executable: /bin/bash
+      register: db1_role
       ignore_errors: yes
 
-    - name: Cek role DB dari .bashrc
+    - name: Debug role DB1
+      debug:
+        msg: "{{ db1_role.stdout }}"
+
+    - name: Set Primary DB1
+      set_stats:
+        data:
+          db1_primary: "ora19cdg01.bwok.org"
+      when: "'PRIMARY' in db1_role.stdout"
+
+    - name: Set Standby DB1
+      set_stats:
+        data:
+          db1_standby: "ora19cdg01.bwok.org"
+      when: "'PHYSICAL STANDBY' in db1_role.stdout"
+
+#########################################################
+- name: CEK ROLE DB2 (IDFGISU1)
+  hosts: ora19cdg02.bwok.org
+  gather_facts: no
+  tasks:
+    - name: Source profile .IDFGISU1 & cek role DB2
       shell: |
-        source ~/.bashrc
+        . .IDFGISU1
         echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
-      register: db_role_bashrc
+      args:
+        executable: /bin/bash
+      register: db2_role
       ignore_errors: yes
 
-    - name: Simpan hasil role dari .bash_profile
-      set_stats:
-        data:
-          db_role_profile: "{{ db_role_bash_profile.stdout | trim }}"
+    - name: Debug role DB2
+      debug:
+        msg: "{{ db2_role.stdout }}"
 
-    - name: Simpan hasil role dari .bashrc
+    - name: Set Primary DB2
       set_stats:
         data:
-          db_role_bashrc: "{{ db_role_bashrc.stdout | trim }}"
+          db2_primary: "ora19cdg02.bwok.org"
+      when: "'PRIMARY' in db2_role.stdout"
+
+    - name: Set Standby DB2
+      set_stats:
+        data:
+          db2_standby: "ora19cdg02.bwok.org"
+      when: "'PHYSICAL STANDBY' in db2_role.stdout"
