@@ -1,30 +1,34 @@
 ---
-- name: CEK ROLE DB1 untuk .IDFGICU1 dan .IDFGISU1
+- name: CEK ROLE DB1 (.IDFGICU1 & .IDFGISU1)
   hosts: 192.168.1.211
   tasks:
-    - name: Cek role DB1 dari .IDFGICU1
+    - name: Get DB1 Role
       shell: |
-        . ~/.IDFGICU1
+        source ~/.IDFGICU1
+        export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
+        export ORACLE_SID=orcl
+        export PATH=$PATH:$ORACLE_HOME/bin
         echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
-      register: db1_cu1_role
+      register: db1_role
+      ignore_errors: yes
 
-    - name: Cek role DB1 dari .IDFGISU1
-      shell: |
-        . ~/.IDFGISU1
-        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
-      register: db1_su1_role
+    - name: Set facts for DB1
+      set_fact:
+        db1_role: "{{ db1_role.stdout }}"
 
-- name: CEK ROLE DB2 untuk .IDFGICU1 dan .IDFGISU1
+- name: CEK ROLE DB2 (.IDFGICU1 & .IDFGISU1)
   hosts: 192.168.1.222
   tasks:
-    - name: Cek role DB2 dari .IDFGICU1
+    - name: Get DB2 Role
       shell: |
-        . ~/.IDFGICU1
+        source ~/.IDFGICU1
+        export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
+        export ORACLE_SID=orcl
+        export PATH=$PATH:$ORACLE_HOME/bin
         echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
-      register: db2_cu1_role
+      register: db2_role
+      ignore_errors: yes
 
-    - name: Cek role DB2 dari .IDFGISU1
-      shell: |
-        . ~/.IDFGISU1
-        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
-      register: db2_su1_role
+    - name: Set facts for DB2
+      set_fact:
+        db2_role: "{{ db2_role.stdout }}"
