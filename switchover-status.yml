@@ -1,16 +1,26 @@
 ---
-- name: Cek switchover status dari Source DB dan Target DB
-  hosts: "{{ source_db }},{{ target_db }}"
-  gather_facts: no
+- name: Switchover Status Check from source and target
+  hosts: "{{ source_db }}"
   tasks:
-    - name: Cek switchover status
+    - name: Cek switchover_status dari source DB
       shell: |
-        . ~/.bash_profile
+        . ~/{{ profile_env }}
         echo "SELECT switchover_status FROM v\$database;" | sqlplus -s / as sysdba
-      args:
-        executable: /bin/bash
-      register: sw_status
+      register: sw_status_src
 
-    - name: Debug hasil switchover status
+    - name: Tampilkan status switchover source
       debug:
-        msg: "Switchover status di {{ inventory_hostname }}: {{ sw_status.stdout }}"
+        msg: "Source ({{ source_db }}) switchover_status: {{ sw_status_src.stdout }}"
+
+- name: Switchover Status Check from target
+  hosts: "{{ target_db }}"
+  tasks:
+    - name: Cek switchover_status dari target DB
+      shell: |
+        . ~/{{ profile_env }}
+        echo "SELECT switchover_status FROM v\$database;" | sqlplus -s / as sysdba
+      register: sw_status_tgt
+
+    - name: Tampilkan status switchover target
+      debug:
+        msg: "Target ({{ target_db }}) switchover_status: {{ sw_status_tgt.stdout }}"
