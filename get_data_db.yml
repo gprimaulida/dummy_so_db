@@ -62,7 +62,7 @@
         export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
         export ORACLE_SID=orcl
         export PATH=$PATH:$ORACLE_HOME/bin
-        echo "SET HEADING OFF FEEDBACK OFF; SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | tr -d '[:space:]'
+        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
       register: role_su1
       ignore_errors: true
 
