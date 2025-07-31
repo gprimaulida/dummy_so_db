@@ -19,16 +19,19 @@
         | sqlplus -s / as sysdba \
         | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
       register: role_cu1
-      ignore_errors: true
+
+    - name: Tampilkan hasil ENV .IDFGICU1
+      debug:
+        msg: |
+          stdout: {{ role_cu1.stdout }}
+          stderr: {{ role_cu1.stderr }}
+          rc: {{ role_cu1.rc }}
 
     - name: Simpan hasil ROLE .IDFGICU1 ke artefact
+      when: role_cu1.rc == 0 and role_cu1.stdout != ""
       set_stats:
         data:
-          "role_cu1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_cu1.stdout }}"
-
-    - name: Debug hasil role .IDFGICU1
-      debug:
-        msg: "role_cu1_{{ hostmap[inventory_hostname] }} => {{ role_cu1.stdout }}"
+          "role_cu1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_cu1.stdout | trim }}"
 
     - name: Cek role di ENV .IDFGISU1
       shell: |
@@ -40,17 +43,16 @@
         | sqlplus -s / as sysdba \
         | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
       register: role_su1
-      ignore_errors: true
+
+    - name: Tampilkan hasil ENV .IDFGISU1
+      debug:
+        msg: |
+          stdout: {{ role_su1.stdout }}
+          stderr: {{ role_su1.stderr }}
+          rc: {{ role_su1.rc }}
 
     - name: Simpan hasil ROLE .IDFGISU1 ke artefact
+      when: role_su1.rc == 0 and role_su1.stdout != ""
       set_stats:
         data:
-          "role_su1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_su1.stdout }}"
-
-    - name: Debug hasil role .IDFGISU1
-      debug:
-        msg: "role_su1_{{ hostmap[inventory_hostname] }} => {{ role_su1.stdout }}"
-
-    - name: Show full artefacts from this step
-      debug:
-        var: ansible_stats
+          "role_su1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_su1.stdout | trim }}"
