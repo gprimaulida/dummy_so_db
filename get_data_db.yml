@@ -1,6 +1,6 @@
 ---
 - name: CEK ROLE DB1 (IDFGICU1)
-  hosts: ora19cdg01.bwok.org
+  hosts: localhost
   gather_facts: no
   tasks:
     - name: Source profile .IDFGICU1 & cek role DB1
@@ -30,7 +30,7 @@
 
 #########################################################
 - name: CEK ROLE DB2 (IDFGISU1)
-  hosts: ora19cdg02.bwok.org
+  hosts: localhost
   gather_facts: no
   tasks:
     - name: Source profile .IDFGISU1 & cek role DB2
