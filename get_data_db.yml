@@ -6,6 +6,7 @@
     hostmap:
       "192.168.1.211": db1
       "192.168.1.222": db2
+
   tasks:
     - name: Cek role di ENV .IDFGICU1
       shell: |
@@ -14,38 +15,30 @@
         export ORACLE_SID=orcl
         export PATH=$PATH:$ORACLE_HOME/bin
         echo "SET HEADING OFF FEEDBACK OFF VERIFY OFF ECHO OFF
-        SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | awk '/PRIMARY|STANDBY/ {print $1}'
-      register: role_cu1
-      ignore_errors: true
-
+      SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | awk '/PRIMARY|STANDBY/ {print $1}'
+    register: role_cu1
+    ignore_errors: true
     - name: Display the output
-      debug:
-        msg: "{{ hostmap[inventory_hostname] }}: {{ role_cu1.stdout }}"
+      debug: msg: "{{ hostmap }}: {{ role_cu1.stdout }}"
 
     - name: Simpan hasil ROLE .IDFGICU1 ke artefact
       set_stats:
         data:
           "role_cu1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_cu1.stdout }}"
- 
-     - name: Cek role di ENV .IDFGISU1
-       shell: |
-         source ~/.IDFGISU1
-         export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
-         export ORACLE_SID=orcl
-         export PATH=$PATH:$ORACLE_HOME/bin
-         echo "SET HEADING OFF FEEDBACK OFF VERIFY OFF ECHO OFF
-         SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | awk '/PRIMARY|STANDBY/ {print $1}'
-       register: role_su1
-       ignore_errors: true
-            
-    - name: Debug inventory_hostname
-      debug:
-        msg: "inventory_hostname: {{ inventory_hostname }}, mapped value: {{ hostmap[inventory_hostname] | default('NOT FOUND') }}"
 
+    - name: Cek role di ENV .IDFGISU1
+      shell: |
+        source ~/.IDFGISU1
+        export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
+        export ORACLE_SID=orcl
+        export PATH=$PATH:$ORACLE_HOME/bin
+        echo "SET HEADING OFF FEEDBACK OFF VERIFY OFF ECHO OFF
+        SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | awk '/PRIMARY|STANDBY/ {print $1}'
+      register: role_su1
+      ignore_errors: true
 
     - name: Display the output
-      debug:
-        msg: "{{ hostmap[inventory_hostname] }}: {{ role_su1.stdout }}"
+      debug: msg: "{{ hostmap }}: {{ role_su1.stdout }}"
 
     - name: Simpan hasil ROLE .IDFGISU1 ke artefact
       set_stats:
