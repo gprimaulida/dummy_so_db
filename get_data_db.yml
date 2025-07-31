@@ -4,8 +4,9 @@
   gather_facts: no
   vars:
     hostmap:
-      192.168.1.211: db1
-      192.168.1.222: db2
+      "192.168.1.211": db1
+      "192.168.1.222": db2
+
   tasks:
     - name: Cek role di ENV .IDFGICU1
       shell: |
@@ -13,48 +14,19 @@
         export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
         export ORACLE_SID=orcl
         export PATH=$PATH:$ORACLE_HOME/bin
-        echo "SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba
+        echo "SET HEADING OFF FEEDBACK OFF VERIFY OFF ECHO OFF
+        SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | sed -n '/PRIMARY\|STANDBY/p' | tr -d '[:space:]' | sed 's/.*PRIMARY.*/PRIMARY/;s/.*STANDBY.*/STANDBY/'
       register: role_cu1
       ignore_errors: true
 
-    - name: Display the output
-      debug: msg="{{ role_cu1.stdout }}"
-
-    - name: Set db standby
-      set_stats:
-        data:
-          standby_db: ""
-
-    - name: Display database role for primary
+    - name: Display role_cu1 output
       debug:
-        msg: "db1"
-      register: prim
-      when: "'PRIMARY' in role_cu1.stdout"
-
-    - name: Display database role for standby
-      debug:
-        msg: "db1"
-      register: stby
-      when: "'PHYSICAL STANDBY' in role_cu1.stdout"
-
-    #- name: Set db primary
-      #set_stats:
-        #data:
-          #primary_db: "DB1"
-      #when: "'PRIMARY' in role_cu1.stdout"
-
-    #- name: Set db standby
-      #set_stats:
-        #data:
-          #standby_db: "DB1"
-      #when: "'PHYSICAL STANDBY' in role_cu1.stdout"
+        msg: "{{ hostmap[inventory_hostname] }}: {{ role_cu1.stdout }}"
 
     - name: Simpan hasil ROLE .IDFGICU1 ke artefact
       set_stats:
         data:
           "role_cu1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_cu1.stdout }}"
-
-#################
 
     - name: Cek role di ENV .IDFGISU1
       shell: |
@@ -62,41 +34,14 @@
         export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
         export ORACLE_SID=orcl
         export PATH=$PATH:$ORACLE_HOME/bin
-        echo "SET HEADING OFF FEEDBACK OFF; SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | tr -d '[:space:]'
+        echo "SET HEADING OFF FEEDBACK OFF VERIFY OFF ECHO OFF
+        SELECT database_role FROM v\$database;" | sqlplus -s / as sysdba | sed -n '/PRIMARY\|STANDBY/p' | tr -d '[:space:]' | sed 's/.*PRIMARY.*/PRIMARY/;s/.*STANDBY.*/STANDBY/'
       register: role_su1
       ignore_errors: true
 
-    - name: Display the output
-      debug: msg="{{ role_su1.stdout }}"
-
-    - name: Set db standby
-      set_stats:
-        data:
-          standby_db: ""
-
-    - name: Display database role for primary
+    - name: Display role_su1 output
       debug:
-        msg: "db1"
-      register: prim
-      when: "'PRIMARY' in role_su1.stdout"
-
-    - name: Display database role for standby
-      debug:
-        msg: "db1"
-      register: stby
-      when: "'PHYSICAL STANDBY' in role_su1.stdout"
-
-    #- name: Set db primary
-      #set_stats:
-        #data:
-          #primary_db: "ora19cdg01.bwok.org"
-      #when: "'PRIMARY' in db1_role.stdout"
-
-    #- name: Set db standby
-      #set_stats:
-        #data:
-          #standby_db: "ora19cdg01.bwok.org"
-      #when: "'PHYSICAL STANDBY' in db1_role.stdout"    
+        msg: "{{ hostmap[inventory_hostname] }}: {{ role_su1.stdout }}"
 
     - name: Simpan hasil ROLE .IDFGISU1 ke artefact
       set_stats:
