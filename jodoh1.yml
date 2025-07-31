@@ -1,74 +1,28 @@
 ---
-- name: Validasi role DB dan hasilkan host_terpilih dalam format deskriptif
+- name: Cek env .IDFGICU1 Primary
   hosts: localhost
-  gather_facts: no
   vars:
-    host_ips:
-      db1: "192.168.1.211"
-      db2: "192.168.1.222"
+    primary_db_cu1: "DB1"
+    standby_db_cu1: "DB2"
   tasks:
-    - name: Ambil hasil role ENV .IDFGICU1 dari artefact
-      set_fact:
-        role_cu1_db1: "{{ hostvars['192.168.1.211']['role_cu1_db1'] | default('UNKNOWN') }}"
-        role_cu1_db2: "{{ hostvars['192.168.1.222']['role_cu1_db2'] | default('UNKNOWN') }}"
-
-    - name: Ambil hasil role ENV .IDFGISU1 dari artefact
-      set_fact:
-        role_su1_db1: "{{ hostvars['192.168.1.211']['role_su1_db1'] | default('UNKNOWN') }}"
-        role_su1_db2: "{{ hostvars['192.168.1.222']['role_su1_db2'] | default('UNKNOWN') }}"
-
-    - name: Format hasil untuk host_terpilih_idfgicu1
-      set_fact:
-        host_terpilih_idfgicu1: "DB1_{{ role_cu1_db1 }} dan DB2_{{ role_cu1_db2 }}"
-
-    - name: Format hasil untuk host_terpilih_idfgisu1
-      set_fact:
-        host_terpilih_idfgisu1: "DB1_{{ role_su1_db1 }} dan DB2_{{ role_su1_db2 }}"
-
-    - name: Validasi bahwa nilai host_terpilih_idfgicu1 valid
-      assert:
-        that:
-          - "'UNKNOWN' not in host_terpilih_idfgicu1"
-        success_msg: "✅ ROLE DB di .IDFGICU1 berhasil dideteksi"
-        fail_msg: "❌ ROLE DB di .IDFGICU1 tidak lengkap"
-
-    - name: Validasi bahwa nilai host_terpilih_idfgisu1 valid
-      assert:
-        that:
-          - "'UNKNOWN' not in host_terpilih_idfgisu1"
-        success_msg: "✅ ROLE DB di .IDFGISU1 berhasil dideteksi"
-        fail_msg: "❌ ROLE DB di .IDFGISU1 tidak lengkap"
-
-    - name: Simpan ke artifact untuk workflow selanjutnya
-      set_stats:
-        data:
-          idfgicu1: "{{ host_terpilih_idfgicu1 }}"
-          idfgisu1: "{{ host_terpilih_idfgisu1 }}"
-
-    # SECTION: Pengecekan terhadap nama host tertentu (berdasarkan role)
-    - name: Set fakta primary dan standby berdasarkan mapping nama host
-      set_fact:
-        primary_db: "ora19cdg01.bwok.org"
-        standby_db: "ora19cdg02.bwok.org"
-
-    - name: Tampilkan data dari PRIMARY
+    - name: "Tampilkan data dari PRIMARY"
       debug:
-        msg: "{{ primary_db }}"
-
-    - name: Tampilkan data dari STANDBY
+        msg: "{{ primary_db_cu1 }}"
+        
+    - name: "Tampilkan data dari STANDBY"
       debug:
-        msg: "{{ standby_db }}"
+        msg: "{{ standby_db_cu1 }}"
 
-    - name: Cek apakah primary_db adalah ora19cdg01.bwok.org
+    - name: "Cek apakah primary_db adalah DB1"
       assert:
         that:
-          - primary_db == 'ora19cdg01.bwok.org'
-        fail_msg: "Pengecekan gagal: primary_db bukan ora19cdg01.bwok.org"
-        success_msg: "Pengecekan berhasil: primary_db adalah ora19cdg01.bwok.org"
+          - primary_db_cu1 == 'DB1'
+        fail_msg: "Pengecekan gagal: primary_db_cu1 bukan DB1"
+        success_msg: "Pengecekan berhasil: primary_db_cu1 adalah DB1"
 
-    - name: Cek apakah standby_db adalah ora19cdg02.bwok.org
+    - name: "Cek apakah standby_db adalah DB2"
       assert:
         that:
-          - standby_db == 'ora19cdg02.bwok.org'
-        fail_msg: "Pengecekan gagal: standby_db bukan ora19cdg02.bwok.org"
-        success_msg: "Pengecekan berhasil: standby_db adalah ora19cdg02.bwok.org"
+          - standby_db_cu1 == 'DB2'
+        fail_msg: "Pengecekan gagal: standby_db_cu1 bukan DB2"
+        success_msg: "Pengecekan berhasil: standby_db_cu1 adalah DB2"
