@@ -1,33 +1,28 @@
 ---
-- name: ACTION PENJODOHAN 2 (ENV .IDFGISU1)
+- name: Cek env .IDFGISU1 Primary
   hosts: localhost
+  vars:
+    primary_db_su1: "DB1"
+    standby_db_su1: "DB2"
   tasks:
-    - name: Ambil switchover_status dari DB1 dan DB2 jika DB1 Primary
-      when:
-        - "'PRIMARY' in hostvars['192.168.1.211']['db1_role']"
-        - "'PHYSICAL STANDBY' in hostvars['192.168.1.222']['db2_role']"
-      block:
-        - name: Switchover status dari DB1
-          shell: |
-            ssh oracle@192.168.1.211 "source ~/.IDFGISU1; echo 'SELECT switchover_status FROM v\\$database;' | sqlplus -s / as sysdba"
-          register: switchover_db1
+    - name: "Tampilkan data dari PRIMARY"
+      debug:
+        msg: "{{ primary_db_su1 }}"
+        
+    - name: "Tampilkan data dari STANDBY"
+      debug:
+        msg: "{{ standby_db_su1 }}"
 
-        - name: Switchover status dari DB2
-          shell: |
-            ssh oracle@192.168.1.222 "source ~/.IDFGISU1; echo 'SELECT switchover_status FROM v\\$database;' | sqlplus -s / as sysdba"
-          register: switchover_db2
+    - name: "Cek apakah primary_db adalah DB1"
+      assert:
+        that:
+          - primary_db_su1 == 'DB1'
+        fail_msg: "Pengecekan gagal: primary_db_su1 bukan DB1"
+        success_msg: "Pengecekan berhasil: primary_db_su1 adalah DB1"
 
-    - name: Ambil switchover_status dari DB2 dan DB1 jika DB2 Primary
-      when:
-        - "'PRIMARY' in hostvars['192.168.1.222']['db2_role']"
-        - "'PHYSICAL STANDBY' in hostvars['192.168.1.211']['db1_role']"
-      block:
-        - name: Switchover status dari DB2
-          shell: |
-            ssh oracle@192.168.1.222 "source ~/.IDFGISU1; echo 'SELECT switchover_status FROM v\\$database;' | sqlplus -s / as sysdba"
-          register: switchover_db2
-
-        - name: Switchover status dari DB1
-          shell: |
-            ssh oracle@192.168.1.211 "source ~/.IDFGISU1; echo 'SELECT switchover_status FROM v\\$database;' | sqlplus -s / as sysdba"
-          register: switchover_db1
+    - name: "Cek apakah standby_db adalah DB2"
+      assert:
+        that:
+          - standby_db_su1 == 'DB2'
+        fail_msg: "Pengecekan gagal: standby_db_su1 bukan DB2"
+        success_msg: "Pengecekan berhasil: standby_db_su1 adalah DB2"
