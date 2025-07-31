@@ -6,7 +6,9 @@
     hostmap:
       192.168.1.211: db1
       192.168.1.222: db2
+
   tasks:
+
     - name: Cek role di ENV .IDFGICU1
       shell: |
         source ~/.IDFGICU1
@@ -17,14 +19,22 @@
       register: role_cu1
       ignore_errors: true
 
-    - name: Display hasil role .IDFGICU1 dari host {{ inventory_hostname }}
+    - name: Display hasil role .IDFGICU1 (stdout)
       debug:
         msg: "{{ role_cu1.stdout }}"
+
+    - name: Display hasil role .IDFGICU1 (stdout_lines)
+      debug:
+        var: role_cu1.stdout_lines
+
+    - name: Display hasil role .IDFGICU1 (stderr)
+      debug:
+        var: role_cu1.stderr
 
     - name: Simpan hasil ROLE .IDFGICU1 ke artefact
       set_stats:
         data:
-          "role_cu1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_cu1.stdout }}"
+          "role_cu1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_cu1.stdout | trim }}"
 
     - name: Cek role di ENV .IDFGISU1
       shell: |
@@ -36,11 +46,19 @@
       register: role_su1
       ignore_errors: true
 
-    - name: Display hasil role .IDFGISU1 dari host {{ inventory_hostname }}
+    - name: Display hasil role .IDFGISU1 (stdout)
       debug:
         msg: "{{ role_su1.stdout }}"
+
+    - name: Display hasil role .IDFGISU1 (stdout_lines)
+      debug:
+        var: role_su1.stdout_lines
+
+    - name: Display hasil role .IDFGISU1 (stderr)
+      debug:
+        var: role_su1.stderr
 
     - name: Simpan hasil ROLE .IDFGISU1 ke artefact
       set_stats:
         data:
-          "role_su1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_su1.stdout }}"
+          "role_su1_{{ hostmap[inventory_hostname] | replace('.', '_') }}": "{{ role_su1.stdout | trim }}"
